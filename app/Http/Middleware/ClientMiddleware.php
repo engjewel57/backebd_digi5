@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminMiddleware
+class ClientMiddleware
 {
     /**
      * Handle an incoming request.
@@ -23,11 +23,11 @@ class AdminMiddleware
             ], 401);
         }
 
-        // Check if user has admin role
-        if ($request->user()->role !== 'admin') {
+        // Check if user has client role
+        if ($request->user()->role !== 'client') {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized. Admin access required.',
+                'message' => 'Unauthorized. Client access required.',
                 'user_role' => $request->user()->role
             ], 403);
         }
