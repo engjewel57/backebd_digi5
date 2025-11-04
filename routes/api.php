@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http; 
 use App\Http\Controllers\Api\PricingPlanController;
 use App\Http\Controllers\Api\ExtraServiceController;
 use App\Http\Controllers\Api\PlanComparisonController;
@@ -127,4 +128,43 @@ Route::middleware('auth:sanctum')->group(function () {
         });
         Route::post('/create-admin', [AdminAuthController::class, 'createAdmin']);
     });
+});
+
+// Test SMS route
+Route::get('/test-sms', function () {
+    $phone = '01770838776'; // Your phone number
+    $otp = '12345';
+    
+    // Format phone number
+    $formattedPhone = preg_replace('/[^0-9]/', '', $phone);
+    if (substr($formattedPhone, 0, 1) === '0') {
+        $formattedPhone = '880' . substr($formattedPhone, 1);
+    }
+    
+    $apiKey = env('SMS_API_KEY');
+    $senderId = env('SMS_SENDER_ID', 'SME CUBE');
+    $message = "Test SMS from SMECube: {$otp}";
+    
+    $url = "https://api.sms.net.bd/sendsms";
+    
+    $response = Http::get($url, [
+        'api_key' => $apiKey,
+        'msg' => urlencode($message),
+        'to' => $formattedPhone,
+        'sender_id' => $senderId,
+    ]);
+    
+    return response()->json([
+        'phone' => $formattedPhone,
+        'api_key' => substr($apiKey, 0, 8) . '...',
+        'sender_id' => $senderId,
+        'response_status' => $response->status(),
+        'response_body' => $response->body(),
+        'full_url' => $url . '?' . http_build_query([
+            'api_key' => $apiKey,
+            'msg' => $message,
+            'to' => $formattedPhone,
+            'sender_id' => $senderId,
+        ])
+    ]);
 });
